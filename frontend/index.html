@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>🛒 E-Commerce App</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f0f2f5; }
+        .navbar { background: #1a1a2e; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .navbar h1 { font-size: 24px; }
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .tab { padding: 10px 25px; border-radius: 25px; cursor: pointer; background: #ddd; font-weight: bold; transition: all 0.3s; }
+        .tab:hover { background: #bbb; }
+        .tab.active { background: #1a1a2e; color: white; }
+        .grid { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .card h2 { margin-bottom: 15px; color: #1a1a2e; font-size: 18px; }
+        input, select, textarea { width: 100%; padding: 10px 15px; margin-bottom: 12px; border: 2px solid #eee; border-radius: 8px; font-size: 14px; outline: none; transition: border 0.3s; }
+        input:focus, select:focus { border-color: #1a1a2e; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: bold; transition: all 0.3s; }
+        .btn-green { background: #4CAF50; color: white; }
+        .btn-green:hover { background: #45a049; }
+        .btn-red { background: #ff4444; color: white; }
+        .btn-red:hover { background: #cc0000; }
+        .btn-blue { background: #2196F3; color: white; }
+        .item { background: #f8f9fa; padding: 12px 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #1a1a2e; }
+        .item-actions { display: flex; gap: 8px; }
+        .item-actions button { padding: 6px 12px; border: none; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        .badge-green { background: #d4edda; color: #155724; }
+        .badge-yellow { background: #fff3cd; color: #856404; }
+        .badge-blue { background: #d1ecf1; color: #0c5460; }
+        .badge-red { background: #f8d7da; color: #721c24; }
+        .empty { text-align: center; color: #999; padding: 30px; font-size: 16px; }
+        .alert { padding: 10px 15px; border-radius: 8px; margin-bottom: 15px; font-weight: bold; }
+        .alert-success { background: #d4edda; color: #155724; }
+        .alert-error { background: #f8d7da; color: #721c24; }
+        .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: white; padding: 20px; border-radius: 15px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .stat-card .number { font-size: 32px; font-weight: bold; color: #1a1a2e; }
+        .stat-card .label { color: #666; font-size: 14px; margin-top: 5px; }
+        #alert-box { position: fixed; top: 20px; right: 20px; z-index: 1000; }
+    </style>
+</head>
+<body>
+
+<div id="alert-box"></div>
+
+<div class="navbar">
+    <h1>🛒 E-Commerce App</h1>
+    <span style="color:#aaa; font-size:14px;">Microservices Demo</span>
+</div>
+
+<div class="container">
+
+    <!-- Stats -->
+    <div class="stats" id="stats">
+        <div class="stat-card"><div class="number" id="stat-users">0</div><div class="label">👤 Users</div></div>
+        <div class="stat-card"><div class="number" id="stat-products">0</div><div class="label">📦 Products</div></div>
+        <div class="stat-card"><div class="number" id="stat-orders">0</div><div class="label">🛍️ Orders</div></div>
+        <div class="stat-card"><div class="number" id="stat-payments">0</div><div class="label">💳 Payments</div></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <div class="tab active" onclick="showTab('products')">📦 Products</div>
+        <div class="tab" onclick="showTab('users')">👤 Users</div>
+        <div class="tab" onclick="showTab('orders')">🛍️ Orders</div>
+        <div class="tab" onclick="showTab('payments')">💳 Payments</div>
+    </div>
+
+    <!-- Products Tab -->
+    <div id="products-tab">
+        <div class="grid">
+            <div class="card">
+                <h2>➕ Add Product</h2>
+                <input type="text" id="p-name" placeholder="Product name *" />
+                <input type="number" id="p-price" placeholder="Price *" />
+                <input type="text" id="p-desc" placeholder="Description" />
+                <input type="number" id="p-stock" placeholder="Stock quantity" />
+                <input type="text" id="p-category" placeholder="Category" />
+                <button class="btn btn-green" onclick="addProduct()">➕ Add Product</button>
+            </div>
+            <div class="card">
+                <h2>📦 Products List</h2>
+                <div id="products-list"><div class="empty">Loading...</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Tab -->
+    <div id="users-tab" style="display:none">
+        <div class="grid">
+            <div class="card">
+                <h2>👤 Register User</h2>
+                <input type="text" id="u-name" placeholder="Full name *" />
+                <input type="email" id="u-email" placeholder="Email *" />
+                <input type="password" id="u-pass" placeholder="Password *" />
+                <button class="btn btn-green" onclick="registerUser()">Register</button>
+            </div>
+            <div class="card">
+                <h2>👥 Users List</h2>
+                <div id="users-list"><div class="empty">Loading...</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders Tab -->
+    <div id="orders-tab" style="display:none">
+        <div class="grid">
+            <div class="card">
+                <h2>🛍️ Place Order</h2>
+                <input type="text" id="o-userid" placeholder="User ID *" />
+                <input type="text" id="o-username" placeholder="User Name" />
+                <input type="text" id="o-productid" placeholder="Product ID *" />
+                <input type="text" id="o-productname" placeholder="Product Name *" />
+                <input type="number" id="o-price" placeholder="Price *" />
+                <input type="number" id="o-qty" placeholder="Quantity *" />
+                <button class="btn btn-green" onclick="placeOrder()">🛍️ Place Order</button>
+            </div>
+            <div class="card">
+                <h2>📋 Orders List</h2>
+                <div id="orders-list"><div class="empty">Loading...</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payments Tab -->
+    <div id="payments-tab" style="display:none">
+        <div class="grid">
+            <div class="card">
+                <h2>💳 Make Payment</h2>
+                <input type="text" id="pay-orderid" placeholder="Order ID *" />
+                <input type="text" id="pay-userid" placeholder="User ID *" />
+                <input type="number" id="pay-amount" placeholder="Amount *" />
+                <select id="pay-method">
+                    <option value="">Select Payment Method</option>
+                    <option value="card">💳 Credit/Debit Card</option>
+                    <option value="upi">📱 UPI</option>
+                    <option value="netbanking">🏦 Net Banking</option>
+                </select>
+                <button class="btn btn-green" onclick="makePayment()">💳 Pay Now</button>
+            </div>
+            <div class="card">
+                <h2>💰 Payments List</h2>
+                <div id="payments-list"><div class="empty">Loading...</div></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const API = window.location.hostname === 'localhost'
+        ? 'http://localhost:4000/api'
+        : '/api';
+
+    // Alert show karo
+    function showAlert(msg, type = 'success') {
+        const box = document.getElementById('alert-box');
+        const div = document.createElement('div');
+        div.className = `alert alert-${type}`;
+        div.innerText = msg;
+        box.appendChild(div);
+        setTimeout(() => div.remove(), 3000);
+    }
+
+    // Tab switch
+    function showTab(tab) {
+        ['products', 'users', 'orders', 'payments'].forEach(t => {
+            document.getElementById(`${t}-tab`).style.display = t === tab ? 'block' : 'none';
+        });
+        document.querySelectorAll('.tab').forEach((el, i) => {
+            el.classList.toggle('active', ['products','users','orders','payments'][i] === tab);
+        });
+        if (tab === 'products') getProducts();
+        if (tab === 'users') getUsers();
+        if (tab === 'orders') getOrders();
+        if (tab === 'payments') getPayments();
+    }
+
+    // Stats update
+    async function updateStats() {
+        try {
+            const [u, p, o, pay] = await Promise.all([
+                fetch(`${API}/users`).then(r => r.json()),
+                fetch(`${API}/products`).then(r => r.json()),
+                fetch(`${API}/orders`).then(r => r.json()),
+                fetch(`${API}/payments`).then(r => r.json()),
+            ]);
+            document.getElementById('stat-users').innerText = u.length || 0;
+            document.getElementById('stat-products').innerText = p.length || 0;
+            document.getElementById('stat-orders').innerText = o.length || 0;
+            document.getElementById('stat-payments').innerText = pay.length || 0;
+        } catch (err) {}
+    }
+
+    // Badge color
+    function getBadgeClass(status) {
+        if (['completed', 'delivered', 'confirmed'].includes(status)) return 'badge-green';
+        if (['pending'].includes(status)) return 'badge-yellow';
+        if (['shipped'].includes(status)) return 'badge-blue';
+        if (['cancelled', 'failed'].includes(status)) return 'badge-red';
+        return 'badge-yellow';
+    }
+
+    // ===== PRODUCTS =====
+    async function getProducts() {
+        try {
+            const res = await fetch(`${API}/products`);
+            const products = await res.json();
+            document.getElementById('products-list').innerHTML = products.length ? products.map(p => `
+                <div class="item">
+                    <div>
+                        <strong>${p.name}</strong> — ₹${p.price}
+                        <span class="badge badge-blue" style="margin-left:8px">${p.category || 'General'}</span><br>
+                        <small style="color:#666">${p.description || ''} | Stock: ${p.stock}</small><br>
+                        <small style="color:#999">ID: ${p._id}</small>
+                    </div>
+                    <div class="item-actions">
+                        <button style="background:#ff4444;color:white" onclick="deleteProduct('${p._id}')">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('') : '<div class="empty">📭 Koi product nahi — pehla product add karo!</div>';
+        } catch (err) {
+            document.getElementById('products-list').innerHTML = '<div class="empty">❌ Products load nahi hue!</div>';
+        }
+    }
+
+    async function addProduct() {
+        const name = document.getElementById('p-name').value.trim();
+        const price = document.getElementById('p-price').value;
+        if (!name || !price) { showAlert('Name aur price required!', 'error'); return; }
+        try {
+            const res = await fetch(`${API}/products`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name,
+                    price: parseFloat(price),
+                    description: document.getElementById('p-desc').value,
+                    stock: parseInt(document.getElementById('p-stock').value) || 0,
+                    category: document.getElementById('p-category').value || 'General'
+                })
+            });
+            const data = await res.json();
+            if (data.error) { showAlert(data.error, 'error'); return; }
+            showAlert('✅ Product added!');
+            document.getElementById('p-name').value = '';
+            document.getElementById('p-price').value = '';
+            document.getElementById('p-desc').value = '';
+            document.getElementById('p-stock').value = '';
+            document.getElementById('p-category').value = '';
+            getProducts();
+            updateStats();
+        } catch (err) {
+            showAlert('❌ Product add nahi hua!', 'error');
+        }
+    }
+
+    async function deleteProduct(id) {
+        if (!confirm('Delete karna hai?')) return;
+        await fetch(`${API}/products/${id}`, { method: 'DELETE' });
+        showAlert('🗑️ Product deleted!');
+        getProducts();
+        updateStats();
+    }
+
+    // ===== USERS =====
+    async function getUsers() {
+        try {
+            const res = await fetch(`${API}/users`);
+            const users = await res.json();
+            document.getElementById('users-list').innerHTML = users.length ? users.map(u => `
+                <div class="item">
+                    <div>
+                        <strong>${u.name}</strong><br>
+                        <small style="color:#666">${u.email}</small><br>
+                        <small style="color:#999">ID: ${u._id}</small>
+                    </div>
+                    <div class="item-actions">
+                        <button style="background:#ff4444;color:white" onclick="deleteUser('${u._id}')">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('') : '<div class="empty">📭 Koi user nahi!</div>';
+        } catch (err) {
+            document.getElementById('users-list').innerHTML = '<div class="empty">❌ Users load nahi hue!</div>';
+        }
+    }
+
+    async function registerUser() {
+        const name = document.getElementById('u-name').value.trim();
+        const email = document.getElementById('u-email').value.trim();
+        const password = document.getElementById('u-pass').value;
+        if (!name || !email || !password) { showAlert('Sab fields required!', 'error'); return; }
+        try {
+            const res = await fetch(`${API}/users/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password })
+            });
+            const data = await res.json();
+            if (data.error) { showAlert(data.error, 'error'); return; }
+            showAlert('✅ User registered!');
+            document.getElementById('u-name').value = '';
+            document.getElementById('u-email').value = '';
+            document.getElementById('u-pass').value = '';
+            getUsers();
+            updateStats();
+        } catch (err) {
+            showAlert('❌ Register failed!', 'error');
+        }
+    }
+
+    async function deleteUser(id) {
+        if (!confirm('Delete karna hai?')) return;
+        await fetch(`${API}/users/${id}`, { method: 'DELETE' });
+        showAlert('🗑️ User deleted!');
+        getUsers();
+        updateStats();
+    }
+
+    // ===== ORDERS =====
+    async function getOrders() {
+        try {
+            const res = await fetch(`${API}/orders`);
+            const orders = await res.json();
+            document.getElementById('orders-list').innerHTML = orders.length ? orders.map(o => `
+                <div class="item">
+                    <div>
+                        <strong>Order #${o._id.slice(-6).toUpperCase()}</strong>
+                        <span class="badge ${getBadgeClass(o.status)}" style="margin-left:8px">${o.status}</span><br>
+                        <small style="color:#666">Amount: ₹${o.totalAmount} | User: ${o.userName || o.userId}</small><br>
+                        <small style="color:#999">Products: ${o.products.map(p => p.name).join(', ')}</small><br>
+                        <small style="color:#999">ID: ${o._id}</small>
+                    </div>
+                    <div class="item-actions">
+                        <select onchange="updateOrderStatus('${o._id}', this.value)" style="width:120px;margin:0;padding:5px">
+                            <option value="pending" ${o.status==='pending'?'selected':''}>Pending</option>
+                            <option value="confirmed" ${o.status==='confirmed'?'selected':''}>Confirmed</option>
+                            <option value="shipped" ${o.status==='shipped'?'selected':''}>Shipped</option>
+                            <option value="delivered" ${o.status==='delivered'?'selected':''}>Delivered</option>
+                            <option value="cancelled" ${o.status==='cancelled'?'selected':''}>Cancelled</option>
+                        </select>
+                        <button style="background:#ff4444;color:white" onclick="deleteOrder('${o._id}')">🗑️</button>
+                    </div>
+                </div>
+            `).join('') : '<div class="empty">📭 Koi order nahi!</div>';
+        } catch (err) {
+            document.getElementById('orders-list').innerHTML = '<div class="empty">❌ Orders load nahi hue!</div>';
+        }
+    }
+
+    async function placeOrder() {
+        const userId = document.getElementById('o-userid').value.trim();
+        const productId = document.getElementById('o-productid').value.trim();
+        const productName = document.getElementById('o-productname').value.trim();
+        const price = parseFloat(document.getElementById('o-price').value);
+        const qty = parseInt(document.getElementById('o-qty').value);
+        if (!userId || !productId || !productName || !price || !qty) {
+            showAlert('Sab fields required!', 'error'); return;
+        }
+        try {
+            const res = await fetch(`${API}/orders`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId,
+                    userName: document.getElementById('o-username').value,
+                    products: [{ productId, name: productName, price, quantity: qty }],
+                    totalAmount: price * qty
+                })
+            });
+            const data = await res.json();
+            if (data.error) { showAlert(data.error, 'error'); return; }
+            showAlert('✅ Order placed!');
+            document.getElementById('o-userid').value = '';
+            document.getElementById('o-username').value = '';
+            document.getElementById('o-productid').value = '';
+            document.getElementById('o-productname').value = '';
+            document.getElementById('o-price').value = '';
+            document.getElementById('o-qty').value = '';
+            getOrders();
+            updateStats();
+        } catch (err) {
+            showAlert('❌ Order failed!', 'error');
+        }
+    }
+
+    async function updateOrderStatus(id, status) {
+        await fetch(`${API}/orders/${id}/status`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status })
+        });
+        showAlert(`✅ Status updated to ${status}!`);
+        getOrders();
+    }
+
+    async function deleteOrder(id) {
+        if (!confirm('Delete karna hai?')) return;
+        await fetch(`${API}/orders/${id}`, { method: 'DELETE' });
+        showAlert('🗑️ Order deleted!');
+        getOrders();
+        updateStats();
+    }
+
+    // ===== PAYMENTS =====
+    async function getPayments() {
+        try {
+            const res = await fetch(`${API}/payments`);
+            const payments = await res.json();
+            document.getElementById('payments-list').innerHTML = payments.length ? payments.map(p => `
+                <div class="item">
+                    <div>
+                        <strong>₹${p.amount}</strong>
+                        <span class="badge ${getBadgeClass(p.status)}" style="margin-left:8px">${p.status}</span><br>
+                        <small style="color:#666">Method: ${p.method} | TXN: ${p.transactionId}</small><br>
+                        <small style="color:#999">Order: ${p.orderId}</small>
+                    </div>
+                </div>
+            `).join('') : '<div class="empty">📭 Koi payment nahi!</div>';
+        } catch (err) {
+            document.getElementById('payments-list').innerHTML = '<div class="empty">❌ Payments load nahi hue!</div>';
+        }
+    }
+
+    async function makePayment() {
+        const orderId = document.getElementById('pay-orderid').value.trim();
+        const userId = document.getElementById('pay-userid').value.trim();
+        const amount = document.getElementById('pay-amount').value;
+        const method = document.getElementById('pay-method').value;
+        if (!orderId || !userId || !amount || !method) {
+            showAlert('Sab fields required!', 'error'); return;
+        }
+        try {
+            const res = await fetch(`${API}/payments`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ orderId, userId, amount: parseFloat(amount), method })
+            });
+            const data = await res.json();
+            if (data.error) { showAlert(data.error, 'error'); return; }
+            showAlert('✅ Payment successful!');
+            document.getElementById('pay-orderid').value = '';
+            document.getElementById('pay-userid').value = '';
+            document.getElementById('pay-amount').value = '';
+            document.getElementById('pay-method').value = '';
+            getPayments();
+            updateStats();
+        } catch (err) {
+            showAlert('❌ Payment failed!', 'error');
+        }
+    }
+
+    // Init
+    getProducts();
+    updateStats();
+</script>
+</body>
+</html>

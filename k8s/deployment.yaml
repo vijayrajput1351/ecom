@@ -1,0 +1,411 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ecom
+  name: frontend-deployment
+spec:
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: vijay1304/frontend-h:latest
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "256Mi"
+---
+#frontend-service
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: ecom
+  name: frontend-service
+spec:
+  selector:
+    app: frontend
+  ports:
+  - port: 80
+    targetPort: 80
+
+---
+#api gatway deploymnet
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ecom
+  name: api-deployment
+spec:
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+      - name: api
+        image: vijay1304/api-h:latest
+        env:
+        - name: USER_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: config
+              key: USER_SERVICE_URL
+        - name: PRODUCT_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: config
+              key: PRODUCT_SERVICE_URL
+        - name: ORDER_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: config
+              key: ORDER_SERVICE_URL
+        - name: PAYMENT_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: config
+              key: PAYMENT_SERVICE_URL
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 4000
+
+---
+#api-service
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: ecom
+  name: api-gateway-service
+spec:
+  selector:
+    app: api
+  ports:
+  - port: 4000
+    targetPort: 4000
+
+---
+#order-deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ecom
+  name: order-deployment
+spec:
+  selector:
+    matchLabels:
+      app: order
+  template:
+    metadata:
+      labels:
+        app: order
+    spec:
+      containers:
+      - name: order
+        image: vijay1304/order-h:latest
+        env:
+        - name: MONGO_URI
+          valueFrom:
+            configMapKeyRef:
+              name: config
+              key: ORDER_MONGO_URI
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 3003
+
+---
+#order-service
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: ecom
+  name: order-service
+spec:
+  selector:
+    app: order
+  ports:
+  - port: 3003
+    targetPort: 3003
+
+---
+#payement-deployment
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ecom
+  name: payment-deployment
+spec:
+  selector:
+    matchLabels:
+      app: payment
+  template:
+    metadata:
+      labels:
+        app: payment
+    spec:
+      containers:
+      - name: payment
+        image: vijay1304/payment-h:latest
+        env:
+        - name: MONGO_URI
+          valueFrom:
+            configMapKeyRef:
+              name: config
+              key: PAYMENT_MONGO_URI
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 3004
+
+---
+#payment-service
+
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: ecom
+  name: payment-service
+spec:
+  selector:
+    app: payment
+  ports:
+  - port: 3004
+    targetPort: 3004
+
+---
+#product-deployment
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ecom
+  name: product-deployment
+spec:
+  selector:
+    matchLabels:
+      app: product
+  template:
+    metadata:
+      labels:
+        app: product
+    spec:
+      containers:
+      - name: product
+        image: vijay1304/product-h:latest
+        env:
+        - name: MONGO_URI
+          valueFrom:
+            configMapKeyRef:
+              name: config
+              key: PRODUCT_MONGO_URI
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 3002
+
+---
+#product-service
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: ecom
+  name: product-service
+spec:
+  selector:
+    app: product
+  ports:
+  - port: 3002
+    targetPort: 3002
+
+---
+#user deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ecom
+  name: user-deployment
+spec:
+  selector:
+    matchLabels:
+      app: user
+  template:
+    metadata:
+      labels:
+        app: user
+    spec:
+      containers:
+      - name: user
+        image: vijay1304/user-h:latest
+        env:
+        - name: MONGO_URI
+          valueFrom:
+            configMapKeyRef:
+              name: config
+              key: USER_MONGO_URI
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 3001
+
+---
+#user service
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: ecom
+  name: user-service
+spec:
+  selector:
+    app: user
+  ports:
+  - port: 3001
+    targetPort: 3001
+
+
+---
+#mongodb-deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ecom
+  name: mongo
+spec:
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      containers:
+      - name: mongo
+        image: mongo:6
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 27017
+
+
+---
+#mongo-service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-service
+  namespace: ecom
+spec:
+  selector:
+    app: mongo
+  ports:
+  - protocol: TCP
+    port: 27017
+    targetPort: 27017
+
+---
+#configmap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: ecom
+  name: config
+data:
+  USER_SERVICE_URL: "http://user-service:3001"
+  PRODUCT_SERVICE_URL: "http://product-service:3002"
+  ORDER_SERVICE_URL: "http://order-service:3003"
+  PAYMENT_SERVICE_URL: "http://payment-service:3004"
+
+  USER_MONGO_URI: "mongodb://admin:mypassword@mongo-service:27017/userdb?authSource=admin"
+  PRODUCT_MONGO_URI: "mongodb://admin:mypassword@mongo-service:27017/productdb?authSource=admin"
+  ORDER_MONGO_URI: "mongodb://admin:mypassword@mongo-service:27017/orderdb?authSource=admin"
+  PAYMENT_MONGO_URI: "mongodb://admin:mypassword@mongo-service:27017/paymentdb?authSource=admin"
+
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: ecom
+  name: frontend-myingress
+  labels:
+    app.kubernetes.io/name: myingress
+spec:
+  rules:
+  - host: vijay.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: frontend-service
+            port: 
+              number: 80
+
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  namespace: ecom
+  name: hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: frontend-deployment
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 60
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
