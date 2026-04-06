@@ -6,6 +6,9 @@ pipeline {
         DOCKERHUB_USER = "vijay1304"
         PATH = "/Users/vijay/.docker/bin:/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin"
         KUBECONFIG = "/Users/vijay/.kube/config"
+        NO_PROXY = "registry-1.docker.io,docker.io"
+        no_proxy = "registry-1.docker.io,docker.io"
+
     }
 
     stages {
